@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uber Fare Cost Prediction</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Uber Fare Prediction</h1>
+    <form id="fare-form">
+        <label for="pickup_latitude">Pickup Latitude:</label>
+        <input type="text" id="pickup_latitude" name="pickup_latitude" required><br>
+
+        <label for="pickup_longitude">Pickup Longitude:</label>
+        <input type="text" id="pickup_longitude" name="pickup_longitude" required><br>
+
+        <label for="dropoff_latitude">Dropoff Latitude:</label>
+        <input type="text" id="dropoff_latitude" name="dropoff_latitude" required><br>
+
+        <label for="dropoff_longitude">Dropoff Longitude:</label>
+        <input type="text" id="dropoff_longitude" name="dropoff_longitude" required><br>
+
+        <label for="passenger_count">Passenger Count:</label>
+        <input type="number" id="passenger_count" name="passenger_count" required><br>
+
+        <button type="submit">Predict Fare</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        const form = document.getElementById('fare-form');
+        const resultDiv = document.getElementById('result');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                resultDiv.innerHTML = `<h3>Predicted Fare: $${result.fare_amount}</h3>`;
+            } else {
+                resultDiv.innerHTML = `<h3>Error: ${result.error}</h3>`;
+            }
+        });
+    </script>
+</body>
+</html>
