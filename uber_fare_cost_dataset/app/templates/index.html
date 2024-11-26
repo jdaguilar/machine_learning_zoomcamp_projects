@@ -8,7 +8,7 @@
 </head>
 <body>
     <h1>Uber Fare Prediction</h1>
-    <form id="fare-form">
+    <form id="fare-form" action="/predict" method="POST">
         <label for="pickup_latitude">Pickup Latitude:</label>
         <input type="text" id="pickup_latitude" name="pickup_latitude" required><br>
 
@@ -26,29 +26,35 @@
 
         <button type="submit">Predict Fare</button>
     </form>
-    <div id="result"></div>
+    <div id="result" style="text-align: center; font-size: 1.5em;"></div>
 
     <script>
         const form = document.getElementById('fare-form');
         const resultDiv = document.getElementById('result');
 
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        form.addEventListener('submit', (e) => {
+            e.preventDefault(); // Prevent the default form submission
             const formData = new FormData(form);
             const data = Object.fromEntries(formData.entries());
 
-            const response = await fetch('/predict', {
+            fetch('/predict', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                },
                 body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultDiv.innerHTML = `<p>Error: ${data.error}</p>`;
+                } else {
+                    resultDiv.innerHTML = `<p>Predicted Fare Amount: $${data.fare_amount}</p>`;
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `<p>Error: ${error.message}</p>`;
             });
-
-            const result = await response.json();
-            if (response.ok) {
-                resultDiv.innerHTML = `<h3>Predicted Fare: $${result.fare_amount}</h3>`;
-            } else {
-                resultDiv.innerHTML = `<h3>Error: ${result.error}</h3>`;
-            }
         });
     </script>
 </body>
